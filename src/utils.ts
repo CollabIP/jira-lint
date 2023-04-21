@@ -48,7 +48,7 @@ export const getJIRAClient = (baseURL: string, token: string): JIRAClient => {
   const getIssue = async (id: string): Promise<JIRA.Issue> => {
     try {
       const response = await client.get<JIRA.Issue>(
-        `/issue/${id}?fields=project,summary,issuetype,labels,status,customfield_10016`
+        `/issue/${id}?fields=project,summary,issuetype,labels,status,customfield_10016,customfield_10030`
       );
       return response.data;
     } catch (e) {
@@ -67,6 +67,7 @@ export const getJIRAClient = (baseURL: string, token: string): JIRAClient => {
           customfield_10016: estimate,
           labels: rawLabels,
           status: issueStatus,
+          customfield_10030: customers
         },
       } = issue;
 
@@ -93,6 +94,7 @@ export const getJIRAClient = (baseURL: string, token: string): JIRAClient => {
         },
         estimate: typeof estimate === 'string' || typeof estimate === 'number' ? estimate : 'N/A',
         labels,
+        customers:  Array.isArray(customers) ? customers?.map((customer) => customer.value) : [],
       };
     } catch (e) {
       throw e;
@@ -111,7 +113,9 @@ export const addLabels = async (client: github.GitHub, labelData: IssuesAddLabel
   try {
     await client.issues.addLabels(labelData);
   } catch (error) {
-    core.setFailed(error.message);
+    if (error instanceof ReferenceError) {
+      core.setFailed(error.message);
+    }
     process.exit(1);
   }
 };
@@ -121,7 +125,9 @@ export const updatePrDetails = async (client: github.GitHub, prData: PullsUpdate
   try {
     await client.pulls.update(prData);
   } catch (error) {
-    core.setFailed(error.message);
+    if (error instanceof ReferenceError) {
+      core.setFailed(error.message);
+    }
     process.exit(1);
   }
 };
@@ -131,7 +137,9 @@ export const addComment = async (client: github.GitHub, comment: IssuesCreateCom
   try {
     await client.issues.createComment(comment);
   } catch (error) {
-    core.setFailed(error.message);
+    if (error instanceof ReferenceError) {
+      core.setFailed(error.message);
+    }
   }
 };
 
@@ -268,9 +276,8 @@ export const getPRDescription = (body = '', details: JIRADetails): string => {
       <td>${details.status}</td>
     </tr>
     <tr>
-      <th>Points</th>
-      <td>${details.estimate || 'N/A'}</td>
-    </tr>
+      <th>Customers</th>
+      <td>${details.customers.join(', ')}</td>
     <tr>
       <th>Labels</th>
       <td>${getLabelsForDisplay(details.labels)}</td>

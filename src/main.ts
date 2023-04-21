@@ -144,18 +144,6 @@ async function run(): Promise<void> {
         labels,
       });
 
-      if (!isIssueStatusValid(VALIDATE_ISSUE_STATUS, ALLOWED_ISSUE_STATUSES.split(','), details)) {
-        const invalidIssueStatusComment: IssuesCreateCommentParams = {
-          ...commonPayload,
-          body: getInvalidIssueStatusComment(details.status, ALLOWED_ISSUE_STATUSES),
-        };
-        console.log('Adding comment for invalid issue status');
-        await addComment(client, invalidIssueStatusComment);
-
-        core.setFailed('The found jira issue does is not in acceptable statuses');
-        process.exit(1);
-      }
-
       if (shouldUpdatePRDescription(prBody)) {
         const prData: PullsUpdateParams = {
           owner,
@@ -186,6 +174,19 @@ async function run(): Promise<void> {
           }
         }
       }
+
+      if (!isIssueStatusValid(VALIDATE_ISSUE_STATUS, ALLOWED_ISSUE_STATUSES.split(','), details)) {
+        const invalidIssueStatusComment: IssuesCreateCommentParams = {
+          ...commonPayload,
+          body: getInvalidIssueStatusComment(details.status, ALLOWED_ISSUE_STATUSES),
+        };
+        console.log('Adding comment for invalid issue status');
+        await addComment(client, invalidIssueStatusComment);
+
+        core.setFailed('The found jira issue does is not in acceptable statuses');
+        process.exit(1);
+      }
+
     } else {
       const comment: IssuesCreateCommentParams = {
         ...commonPayload,
@@ -198,7 +199,9 @@ async function run(): Promise<void> {
     }
   } catch (error) {
     console.log({ error });
-    core.setFailed(error.message);
+    if (error instanceof ReferenceError) {
+      core.setFailed(error.message);
+    }
     process.exit(1);
   }
 }

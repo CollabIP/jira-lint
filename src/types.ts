@@ -110,6 +110,7 @@ export interface JIRADetails {
   };
   estimate: string | number;
   labels: readonly { name: string; url: string }[];
+  customers: readonly string[];
 }
 
 export interface JIRALintActionInputs {
