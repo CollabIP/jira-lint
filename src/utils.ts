@@ -67,7 +67,7 @@ export const getJIRAClient = (baseURL: string, token: string): JIRAClient => {
           customfield_10016: estimate,
           labels: rawLabels,
           status: issueStatus,
-          customfield_10030: customers
+          customfield_10030: customers,
         },
       } = issue;
 
@@ -94,7 +94,7 @@ export const getJIRAClient = (baseURL: string, token: string): JIRAClient => {
         },
         estimate: typeof estimate === 'string' || typeof estimate === 'number' ? estimate : 'N/A',
         labels,
-        customers:  Array.isArray(customers) ? customers?.map((customer) => customer.value) : [],
+        customers: Array.isArray(customers) ? customers?.map((customer) => customer.value) : [],
       };
     } catch (e) {
       throw e;
@@ -358,15 +358,18 @@ export const isIssueStatusValid = (
 /** Get the comment body for very huge PR. */
 export const getInvalidIssueStatusComment = (
   /** Number of additions. */
-  issueStatus: string,
+  details: JIRADetails,
   /** Threshold of additions allowed. */
   allowedStatuses: string
-): string =>
-  `<p>:broken_heart: The detected issue is not in one of the allowed statuses :broken_heart: </p>    
+): string => {
+  const displayKey = details.key.toUpperCase();
+  return `
+  <summary><a href="${details.url}" title="${displayKey}" target="_blank">${displayKey}</a></summary>
+  <p>:broken_heart: The detected issue is not in one of the allowed statuses :broken_heart: </p>    
    <table>
      <tr>
         <th>Detected Status</th>
-        <td>${issueStatus}</td>
+        <td>${details.status}</td>
         <td>:x:</td>
      </tr>
      <tr>
@@ -377,3 +380,4 @@ export const getInvalidIssueStatusComment = (
    </table>
    <p>Please ensure your jira story is in one of the allowed statuses</p>
   `;
+};

@@ -178,7 +178,7 @@ async function run(): Promise<void> {
       if (!isIssueStatusValid(VALIDATE_ISSUE_STATUS, ALLOWED_ISSUE_STATUSES.split(','), details)) {
         const invalidIssueStatusComment: IssuesCreateCommentParams = {
           ...commonPayload,
-          body: getInvalidIssueStatusComment(details.status, ALLOWED_ISSUE_STATUSES),
+          body: getInvalidIssueStatusComment(details, ALLOWED_ISSUE_STATUSES),
         };
         console.log('Adding comment for invalid issue status');
         await addComment(client, invalidIssueStatusComment);
