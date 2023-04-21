@@ -144,13 +144,13 @@ async function run(): Promise<void> {
         labels,
       });
 
-      if (shouldUpdatePRDescription(prBody)) {
+      if (shouldUpdatePRDescription(prBody || '')) {
         const prData: PullsUpdateParams = {
           owner,
           repo,
           // eslint-disable-next-line @typescript-eslint/camelcase
           pull_number: prNumber,
-          body: getPRDescription(prBody, details),
+          body: getPRDescription(prBody || '', details),
         };
         await updatePrDetails(client, prData);
 

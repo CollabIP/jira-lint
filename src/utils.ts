@@ -238,7 +238,7 @@ export const shouldSkipBranchLint = (branch: string, additionalIgnorePattern?: s
 export const shouldUpdatePRDescription = (
   /** The PR description/body as a string. */
   body?: string
-): boolean => typeof body === 'string' && !MARKER_REGEX.test(body);
+): boolean => typeof body !== 'string' || (typeof body === 'string' && !MARKER_REGEX.test(body));
 
 /**
  * Get links to labels & remove spacing so the table works.
