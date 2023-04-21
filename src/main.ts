@@ -173,6 +173,8 @@ async function run(): Promise<void> {
             addComment(client, hugePrComment);
           }
         }
+      } else{
+        console.log('PR description is already updated');
       }
 
       if (!isIssueStatusValid(VALIDATE_ISSUE_STATUS, ALLOWED_ISSUE_STATUSES.split(','), details)) {
