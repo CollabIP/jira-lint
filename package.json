@@ -40,7 +40,8 @@
   "dependencies": {
     "@actions/core": "^1.2.6",
     "@actions/github": "^1.1.0",
-    "minimist": "^1.2.8"
+    "minimist": "^1.2.8",
+    "string-similarity": "^4.0.4"
   },
   "devDependencies": {
     "@types/string-similarity": "^4.0.0",
