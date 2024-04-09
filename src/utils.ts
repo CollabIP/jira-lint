@@ -94,7 +94,7 @@ export const getJIRAClient = (baseURL: string, token: string): JIRAClient => {
         },
         estimate: typeof estimate === 'string' || typeof estimate === 'number' ? estimate : 'N/A',
         labels,
-        customers: Array.isArray(customers) ? customers?.map((customer) => customer.value) : [],
+        customers: Array.isArray(customers) ? customers?.map((customer) => customer) : [],
       };
     } catch (e) {
       throw e;
