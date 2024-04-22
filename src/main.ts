@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
-import { Octokit } from '@octokit/rest';
+import { Octokit, RestEndpointMethodTypes } from '@octokit/rest';
 
 import {
   addComment,
@@ -99,7 +99,7 @@ async function run(): Promise<void> {
     
     if (!headBranch && !baseBranch) {
       const commentBody = 'jira-lint is unable to determine the head and base branch';
-      const comment: Octokit.IssuesCreateCommentParams = {
+      const comment: RestEndpointMethodTypes['issues']['createComment']['parameters'] = {
         ...commonPayload,
         body: commentBody,
       };
@@ -118,7 +118,7 @@ async function run(): Promise<void> {
 
     const issueKeys = getJIRAIssueKeys(headBranch);
     if (!issueKeys.length) {
-      const comment: Octokit.IssuesCreateCommentParams = {
+      const comment: RestEndpointMethodTypes['issues']['createComment']['parameters'] = {
         ...commonPayload,
         body: getNoIdComment(headBranch),
       };
@@ -147,7 +147,7 @@ async function run(): Promise<void> {
       });
 
       if (shouldUpdatePRDescription(prBody || '')) {
-        const prData: Octokit.PullsUpdateParams = {
+        const prData: RestEndpointMethodTypes['pulls']['update']['parameters'] = {
           owner,
           repo,
           // eslint-disable-next-line @typescript-eslint/camelcase
@@ -158,7 +158,7 @@ async function run(): Promise<void> {
 
         // add comment for PR title
         if (!SKIP_COMMENTS) {
-          const prTitleComment: Octokit.IssuesCreateCommentParams = {
+          const prTitleComment: RestEndpointMethodTypes['issues']['createComment']['parameters'] = {
             ...commonPayload,
             body: getPRTitleComment(details.summary, title),
           };
@@ -167,7 +167,7 @@ async function run(): Promise<void> {
 
           // add a comment if the PR is huge
           if (isHumongousPR(additions, prThreshold)) {
-            const hugePrComment: Octokit.IssuesCreateCommentParams = {
+            const hugePrComment: RestEndpointMethodTypes['issues']['createComment']['parameters']  = {
               ...commonPayload,
               body: getHugePrComment(additions, prThreshold),
             };
@@ -180,7 +180,7 @@ async function run(): Promise<void> {
       }
 
       if (!isIssueStatusValid(VALIDATE_ISSUE_STATUS, ALLOWED_ISSUE_STATUSES.split(','), details)) {
-        const invalidIssueStatusComment: Octokit.IssuesCreateCommentParams = {
+        const invalidIssueStatusComment: RestEndpointMethodTypes['issues']['createComment']['parameters']  = {
           ...commonPayload,
           body: getInvalidIssueStatusComment(details, ALLOWED_ISSUE_STATUSES),
         };
@@ -192,7 +192,7 @@ async function run(): Promise<void> {
       }
 
     } else {
-      const comment: Octokit.IssuesCreateCommentParams = {
+      const comment: RestEndpointMethodTypes['issues']['createComment']['parameters']  = {
         ...commonPayload,
         body: getNoIdComment(headBranch),
       };

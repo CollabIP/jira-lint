@@ -1,7 +1,7 @@
 import axios from 'axios';
 import * as core from '@actions/core';
 import similarity from 'string-similarity';
-import { Octokit } from '@octokit/rest';
+import { Octokit, RestEndpointMethodTypes } from '@octokit/rest';
 import {
   MARKER_REGEX,
   BOT_BRANCH_PATTERNS,
@@ -108,7 +108,7 @@ export const getJIRAClient = (baseURL: string, token: string): JIRAClient => {
 };
 
 /** Add the specified label to the PR. */
-export const addLabels = async (client: Octokit, labelData: Octokit.IssuesAddLabelsParams): Promise<void> => {
+export const addLabels = async (client: Octokit, labelData: RestEndpointMethodTypes['issues']['addLabels']['parameters']): Promise<void> => {
   try {
     await client.issues.addLabels(labelData);
   } catch (error) {
@@ -120,7 +120,7 @@ export const addLabels = async (client: Octokit, labelData: Octokit.IssuesAddLab
 };
 
 /** Update a PR details. */
-export const updatePrDetails = async (client: Octokit, prData: Octokit.PullsUpdateParams): Promise<void> => {
+export const updatePrDetails = async (client: Octokit, prData: RestEndpointMethodTypes['pulls']['update']['parameters']): Promise<void> => {
   try {
     await client.pulls.update(prData);
   } catch (error) {
@@ -132,7 +132,7 @@ export const updatePrDetails = async (client: Octokit, prData: Octokit.PullsUpda
 };
 
 /** Add a comment to a PR. */
-export const addComment = async (client: Octokit, comment: Octokit.IssuesCreateCommentParams): Promise<void> => {
+export const addComment = async (client: Octokit, comment: RestEndpointMethodTypes['issues']['createComment']['parameters']): Promise<void> => {
   try {
     await client.issues.createComment(comment);
   } catch (error) {
