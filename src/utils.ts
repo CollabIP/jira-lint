@@ -112,6 +112,7 @@ export const addLabels = async (client: Octokit, labelData: RestEndpointMethodTy
   try {
     await client.issues.addLabels(labelData);
   } catch (error) {
+    console.log({ error });
     if (error instanceof ReferenceError) {
       core.setFailed(error.message);
     }
@@ -124,6 +125,7 @@ export const updatePrDetails = async (client: Octokit, prData: RestEndpointMetho
   try {
     await client.pulls.update(prData);
   } catch (error) {
+    console.log({ error });
     if (error instanceof ReferenceError) {
       core.setFailed(error.message);
     }
@@ -136,6 +138,7 @@ export const addComment = async (client: Octokit, comment: RestEndpointMethodTyp
   try {
     await client.issues.createComment(comment);
   } catch (error) {
+    console.log({ error });
     if (error instanceof ReferenceError) {
       core.setFailed(error.message);
     }
