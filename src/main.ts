@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
+import fetch from 'node-fetch';
 import { Octokit, RestEndpointMethodTypes } from '@octokit/rest';
 
 import {
@@ -95,7 +96,7 @@ async function run(): Promise<void> {
     // github client with given token
     //const client: github.GitHub = new github.GitHub(GITHUB_TOKEN);
 
-    const client: Octokit = new Octokit({ auth: GITHUB_TOKEN});
+    const client: Octokit = new Octokit({ auth: GITHUB_TOKEN, request: { fetch }});
     
     if (!headBranch && !baseBranch) {
       const commentBody = 'jira-lint is unable to determine the head and base branch';
