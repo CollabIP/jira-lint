@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
-import { PullsUpdateParams, IssuesCreateCommentParams } from '@octokit/rest';
+import { Octokit } from '@octokit/rest';
 
 import {
   addComment,
@@ -93,11 +93,13 @@ async function run(): Promise<void> {
     };
 
     // github client with given token
-    const client: github.GitHub = new github.GitHub(GITHUB_TOKEN);
+    //const client: github.GitHub = new github.GitHub(GITHUB_TOKEN);
 
+    const client: Octokit = new Octokit({ auth: GITHUB_TOKEN});
+    
     if (!headBranch && !baseBranch) {
       const commentBody = 'jira-lint is unable to determine the head and base branch';
-      const comment: IssuesCreateCommentParams = {
+      const comment: Octokit.IssuesCreateCommentParams = {
         ...commonPayload,
         body: commentBody,
       };
@@ -116,7 +118,7 @@ async function run(): Promise<void> {
 
     const issueKeys = getJIRAIssueKeys(headBranch);
     if (!issueKeys.length) {
-      const comment: IssuesCreateCommentParams = {
+      const comment: Octokit.IssuesCreateCommentParams = {
         ...commonPayload,
         body: getNoIdComment(headBranch),
       };
@@ -145,7 +147,7 @@ async function run(): Promise<void> {
       });
 
       if (shouldUpdatePRDescription(prBody || '')) {
-        const prData: PullsUpdateParams = {
+        const prData: Octokit.PullsUpdateParams = {
           owner,
           repo,
           // eslint-disable-next-line @typescript-eslint/camelcase
@@ -156,7 +158,7 @@ async function run(): Promise<void> {
 
         // add comment for PR title
         if (!SKIP_COMMENTS) {
-          const prTitleComment: IssuesCreateCommentParams = {
+          const prTitleComment: Octokit.IssuesCreateCommentParams = {
             ...commonPayload,
             body: getPRTitleComment(details.summary, title),
           };
@@ -165,7 +167,7 @@ async function run(): Promise<void> {
 
           // add a comment if the PR is huge
           if (isHumongousPR(additions, prThreshold)) {
-            const hugePrComment: IssuesCreateCommentParams = {
+            const hugePrComment: Octokit.IssuesCreateCommentParams = {
               ...commonPayload,
               body: getHugePrComment(additions, prThreshold),
             };
@@ -178,7 +180,7 @@ async function run(): Promise<void> {
       }
 
       if (!isIssueStatusValid(VALIDATE_ISSUE_STATUS, ALLOWED_ISSUE_STATUSES.split(','), details)) {
-        const invalidIssueStatusComment: IssuesCreateCommentParams = {
+        const invalidIssueStatusComment: Octokit.IssuesCreateCommentParams = {
           ...commonPayload,
           body: getInvalidIssueStatusComment(details, ALLOWED_ISSUE_STATUSES),
         };
@@ -190,7 +192,7 @@ async function run(): Promise<void> {
       }
 
     } else {
-      const comment: IssuesCreateCommentParams = {
+      const comment: Octokit.IssuesCreateCommentParams = {
         ...commonPayload,
         body: getNoIdComment(headBranch),
       };
