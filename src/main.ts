@@ -208,6 +208,9 @@ async function run(): Promise<void> {
     }
     process.exit(1);
   }
+
+  console.log('JIRA linting is successful!');
+  process.exit(0);
 }
 
 run();
