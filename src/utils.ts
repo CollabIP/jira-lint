@@ -21,7 +21,7 @@ export const reverseString = (input: string): string => input.split('').reverse(
 export const getJIRAIssueKeys = (input: string): string[] => {
   const matches = reverseString(input).toUpperCase().match(JIRA_REGEX_MATCHER);
   if (matches?.length) {
-    return matches.map(reverseString).reverse();
+    return matches.map(reverseString);
   } else return [];
 };
 
