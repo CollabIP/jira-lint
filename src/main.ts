@@ -96,8 +96,8 @@ async function run(): Promise<void> {
     // github client with given token
     //const client: github.GitHub = new github.GitHub(GITHUB_TOKEN);
 
-    const client: Octokit = new Octokit({ auth: GITHUB_TOKEN, request: { fetch }});
-    
+    const client: Octokit = new Octokit({ auth: GITHUB_TOKEN, request: { fetch } });
+
     if (!headBranch && !baseBranch) {
       const commentBody = 'jira-lint is unable to determine the head and base branch';
       const comment: RestEndpointMethodTypes['issues']['createComment']['parameters'] = {
@@ -168,7 +168,7 @@ async function run(): Promise<void> {
 
           // add a comment if the PR is huge
           if (isHumongousPR(additions, prThreshold)) {
-            const hugePrComment: RestEndpointMethodTypes['issues']['createComment']['parameters']  = {
+            const hugePrComment: RestEndpointMethodTypes['issues']['createComment']['parameters'] = {
               ...commonPayload,
               body: getHugePrComment(additions, prThreshold),
             };
@@ -176,12 +176,12 @@ async function run(): Promise<void> {
             addComment(client, hugePrComment);
           }
         }
-      } else{
+      } else {
         console.log('PR description is already updated');
       }
 
       if (!isIssueStatusValid(VALIDATE_ISSUE_STATUS, ALLOWED_ISSUE_STATUSES.split(','), details)) {
-        const invalidIssueStatusComment: RestEndpointMethodTypes['issues']['createComment']['parameters']  = {
+        const invalidIssueStatusComment: RestEndpointMethodTypes['issues']['createComment']['parameters'] = {
           ...commonPayload,
           body: getInvalidIssueStatusComment(details, ALLOWED_ISSUE_STATUSES),
         };
@@ -191,9 +191,8 @@ async function run(): Promise<void> {
         core.setFailed('The found jira issue does is not in acceptable statuses');
         process.exit(1);
       }
-
     } else {
-      const comment: RestEndpointMethodTypes['issues']['createComment']['parameters']  = {
+      const comment: RestEndpointMethodTypes['issues']['createComment']['parameters'] = {
         ...commonPayload,
         body: getNoIdComment(headBranch),
       };
