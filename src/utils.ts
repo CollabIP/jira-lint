@@ -108,7 +108,10 @@ export const getJIRAClient = (baseURL: string, token: string): JIRAClient => {
 };
 
 /** Add the specified label to the PR. */
-export const addLabels = async (client: Octokit, labelData: RestEndpointMethodTypes['issues']['addLabels']['parameters']): Promise<void> => {
+export const addLabels = async (
+  client: Octokit,
+  labelData: RestEndpointMethodTypes['issues']['addLabels']['parameters']
+): Promise<void> => {
   try {
     await client.issues.addLabels(labelData);
   } catch (error) {
@@ -121,7 +124,10 @@ export const addLabels = async (client: Octokit, labelData: RestEndpointMethodTy
 };
 
 /** Update a PR details. */
-export const updatePrDetails = async (client: Octokit, prData: RestEndpointMethodTypes['pulls']['update']['parameters']): Promise<void> => {
+export const updatePrDetails = async (
+  client: Octokit,
+  prData: RestEndpointMethodTypes['pulls']['update']['parameters']
+): Promise<void> => {
   try {
     await client.pulls.update(prData);
   } catch (error) {
@@ -134,7 +140,10 @@ export const updatePrDetails = async (client: Octokit, prData: RestEndpointMetho
 };
 
 /** Add a comment to a PR. */
-export const addComment = async (client: Octokit, comment: RestEndpointMethodTypes['issues']['createComment']['parameters']): Promise<void> => {
+export const addComment = async (
+  client: Octokit,
+  comment: RestEndpointMethodTypes['issues']['createComment']['parameters']
+): Promise<void> => {
   try {
     await client.issues.createComment(comment);
   } catch (error) {
