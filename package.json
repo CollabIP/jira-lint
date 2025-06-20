@@ -8,7 +8,8 @@
     "build": "ncc build src/main.ts -o lib --source-map",
     "test": "jest",
     "test:watch": "jest --watch",
-    "lint": "prettier --check src/**/*.ts && eslint src/**/*.ts",
+    "lint": "prettier --check src/**/*.ts",
+    "lint-with-eslint": "prettier --check src/**/*.ts && eslint src/**/*.ts",
     "docs:toc": "markdown-toc -i --bullets='-' README.md"
   },
   "repository": {
