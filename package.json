@@ -4,7 +4,7 @@
   "description": "Add JIRA issue details to your GitHub pull request",
   "main": "lib/index.js",
   "scripts": {
-    "prebuild": "engines-ok && del /S /Q lib",
+    "prebuild": "engines-ok",
     "build": "ncc build src/main.ts -o lib --source-map",
     "test": "jest",
     "test:watch": "jest --watch",
