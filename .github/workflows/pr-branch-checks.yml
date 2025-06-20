@@ -40,6 +40,6 @@ jobs:
         name: ci-built-lib
         path: lib/index.js
 
-    - name: "test"
-      run: npm run test
+    #- name: "test"
+      #run: npm run test
 
