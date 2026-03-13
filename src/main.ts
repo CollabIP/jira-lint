@@ -20,6 +20,8 @@ import {
   updatePrDetails,
   isIssueStatusValid,
   getInvalidIssueStatusComment,
+  isPRTitleValid,
+  getInvalidPRTitleComment,
 } from './utils';
 import { PullRequestParams, JIRADetails, JIRALintActionInputs } from './types';
 import { DEFAULT_PR_ADDITIONS_THRESHOLD } from './constants';
@@ -132,6 +134,18 @@ async function run(): Promise<void> {
     // use the last match (end of the branch name)
     const issueKey = issueKeys[issueKeys.length - 1];
     console.log(`JIRA key -> ${issueKey}`);
+
+    // validate PR title starts with the JIRA issue key
+    if (!isPRTitleValid(title, issueKey)) {
+      const comment: RestEndpointMethodTypes['issues']['createComment']['parameters'] = {
+        ...commonPayload,
+        body: getInvalidPRTitleComment(title, issueKey),
+      };
+      await addComment(client, comment);
+
+      core.setFailed(`PR title must start with "${issueKey.toUpperCase()} ". Current title: "${title}"`);
+      process.exit(1);
+    }
 
     const { getTicketDetails } = getJIRAClient(JIRA_BASE_URL, JIRA_TOKEN);
     const details: JIRADetails = await getTicketDetails(issueKey);

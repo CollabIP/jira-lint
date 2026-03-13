@@ -12,6 +12,8 @@ import {
   getJIRAClient,
   getInvalidIssueStatusComment,
   isIssueStatusValid,
+  isPRTitleValid,
+  getInvalidPRTitleComment,
 } from '../src/utils';
 import { HIDDEN_MARKER } from '../src/constants';
 import { JIRADetails } from '../src/types';
@@ -290,5 +292,42 @@ describe('getInvalidIssueStatusComment()', () => {
     };
     expect(getInvalidIssueStatusComment(issue, 'In Progress')).toContain('Assessment');
     expect(getInvalidIssueStatusComment(issue, 'In Progress')).toContain('In Progress');
+  });
+});
+
+describe('isPRTitleValid()', () => {
+  it('should return true when title starts with uppercase issue key and space', () => {
+    expect(isPRTitleValid('MOJO-123 Add new feature', 'MOJO-123')).toBe(true);
+    expect(isPRTitleValid('ES-43 Fix login bug', 'ES-43')).toBe(true);
+  });
+
+  it('should return true when issue key from branch is lowercase', () => {
+    expect(isPRTitleValid('MOJO-123 Add new feature', 'mojo-123')).toBe(true);
+  });
+
+  it('should return false when title does not start with the issue key', () => {
+    expect(isPRTitleValid('Add new feature', 'MOJO-123')).toBe(false);
+    expect(isPRTitleValid('Fix MOJO-123 bug', 'MOJO-123')).toBe(false);
+  });
+
+  it('should return false when issue key is not followed by a space', () => {
+    expect(isPRTitleValid('MOJO-123-Add new feature', 'MOJO-123')).toBe(false);
+    expect(isPRTitleValid('MOJO-123', 'MOJO-123')).toBe(false);
+  });
+
+  it('should return false when title uses lowercase issue key', () => {
+    expect(isPRTitleValid('mojo-123 Add new feature', 'MOJO-123')).toBe(false);
+  });
+
+  it('should return false with empty title', () => {
+    expect(isPRTitleValid('', 'MOJO-123')).toBe(false);
+  });
+});
+
+describe('getInvalidPRTitleComment()', () => {
+  it('should return comment with expected prefix and current title', () => {
+    const comment = getInvalidPRTitleComment('Bad title', 'MOJO-123');
+    expect(comment).toContain('MOJO-123');
+    expect(comment).toContain('Bad title');
   });
 });

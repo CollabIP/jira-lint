@@ -343,6 +343,29 @@ Valid sample branch names:
 `;
 };
 
+/** Check if the PR title starts with the JIRA issue key (uppercase) followed by a space. */
+export const isPRTitleValid = (prTitle: string, issueKey: string): boolean => {
+  const expectedPrefix = `${issueKey.toUpperCase()} `;
+  return prTitle.startsWith(expectedPrefix);
+};
+
+/** Get the comment body for a PR title missing the JIRA issue key prefix. */
+export const getInvalidPRTitleComment = (prTitle: string, issueKey: string): string => {
+  const upperKey = issueKey.toUpperCase();
+  return `<p>:x: PR title must start with the JIRA issue key from your branch.</p>
+<table>
+  <tr>
+    <th>Expected prefix</th>
+    <td><code>${upperKey} </code></td>
+  </tr>
+  <tr>
+    <th>Current title</th>
+    <td>${prTitle}</td>
+  </tr>
+</table>
+<p>Example: <code>${upperKey} Add new feature</code></p>`;
+};
+
 /** Check if jira issue status validation is enabled then compare the issue status will the allowed statuses. */
 export const isIssueStatusValid = (
   shouldValidate: boolean,
