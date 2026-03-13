@@ -45,59 +45,51 @@ export const getJIRAClient = (baseURL: string, token: string): JIRAClient => {
   });
 
   const getIssue = async (id: string): Promise<JIRA.Issue> => {
-    try {
-      const response = await client.get<JIRA.Issue>(
-        `/issue/${id}?fields=project,summary,issuetype,labels,status,customfield_10016,customfield_10030`
-      );
-      return response.data;
-    } catch (e) {
-      throw e;
-    }
+    const response = await client.get<JIRA.Issue>(
+      `/issue/${id}?fields=project,summary,issuetype,labels,status,customfield_10016,customfield_10030`
+    );
+    return response.data;
   };
 
   const getTicketDetails = async (key: string): Promise<JIRADetails> => {
-    try {
-      const issue: JIRA.Issue = await getIssue(key);
-      const {
-        fields: {
-          issuetype: type,
-          project,
-          summary,
-          customfield_10016: estimate,
-          labels: rawLabels,
-          status: issueStatus,
-          customfield_10030: customers,
-        },
-      } = issue;
-
-      const labels = rawLabels.map((label) => ({
-        name: label,
-        url: `${baseURL}/issues?jql=${encodeURIComponent(
-          `project = ${project.key} AND labels = ${label} ORDER BY created DESC`
-        )}`,
-      }));
-
-      return {
-        key,
+    const issue: JIRA.Issue = await getIssue(key);
+    const {
+      fields: {
+        issuetype: type,
+        project,
         summary,
-        url: `${baseURL}/browse/${key}`,
-        status: issueStatus.name,
-        type: {
-          name: type.name,
-          icon: type.iconUrl,
-        },
-        project: {
-          name: project.name,
-          url: `${baseURL}/browse/${project.key}`,
-          key: project.key,
-        },
-        estimate: typeof estimate === 'string' || typeof estimate === 'number' ? estimate : 'N/A',
-        labels,
-        customers: Array.isArray(customers) ? customers?.map((customer) => customer) : [],
-      };
-    } catch (e) {
-      throw e;
-    }
+        customfield_10016: estimate,
+        labels: rawLabels,
+        status: issueStatus,
+        customfield_10030: customers,
+      },
+    } = issue;
+
+    const labels = rawLabels.map((label) => ({
+      name: label,
+      url: `${baseURL}/issues?jql=${encodeURIComponent(
+        `project = ${project.key} AND labels = ${label} ORDER BY created DESC`
+      )}`,
+    }));
+
+    return {
+      key,
+      summary,
+      url: `${baseURL}/browse/${key}`,
+      status: issueStatus.name,
+      type: {
+        name: type.name,
+        icon: type.iconUrl,
+      },
+      project: {
+        name: project.name,
+        url: `${baseURL}/browse/${project.key}`,
+        key: project.key,
+      },
+      estimate: typeof estimate === 'string' || typeof estimate === 'number' ? estimate : 'N/A',
+      labels,
+      customers: Array.isArray(customers) ? customers?.map((customer) => customer) : [],
+    };
   };
 
   return {
@@ -108,7 +100,10 @@ export const getJIRAClient = (baseURL: string, token: string): JIRAClient => {
 };
 
 /** Add the specified label to the PR. */
-export const addLabels = async (client: Octokit, labelData: RestEndpointMethodTypes['issues']['addLabels']['parameters']): Promise<void> => {
+export const addLabels = async (
+  client: Octokit,
+  labelData: RestEndpointMethodTypes['issues']['addLabels']['parameters']
+): Promise<void> => {
   try {
     await client.issues.addLabels(labelData);
   } catch (error) {
@@ -121,7 +116,10 @@ export const addLabels = async (client: Octokit, labelData: RestEndpointMethodTy
 };
 
 /** Update a PR details. */
-export const updatePrDetails = async (client: Octokit, prData: RestEndpointMethodTypes['pulls']['update']['parameters']): Promise<void> => {
+export const updatePrDetails = async (
+  client: Octokit,
+  prData: RestEndpointMethodTypes['pulls']['update']['parameters']
+): Promise<void> => {
   try {
     await client.pulls.update(prData);
   } catch (error) {
@@ -134,7 +132,10 @@ export const updatePrDetails = async (client: Octokit, prData: RestEndpointMetho
 };
 
 /** Add a comment to a PR. */
-export const addComment = async (client: Octokit, comment: RestEndpointMethodTypes['issues']['createComment']['parameters']): Promise<void> => {
+export const addComment = async (
+  client: Octokit,
+  comment: RestEndpointMethodTypes['issues']['createComment']['parameters']
+): Promise<void> => {
   try {
     await client.issues.createComment(comment);
   } catch (error) {
