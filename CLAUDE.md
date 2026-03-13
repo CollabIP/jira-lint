@@ -12,7 +12,7 @@ A GitHub Action (forked from ClearTax/jira-lint) that lints PRs against JIRA. It
 - **Test:** `npm test` (Jest with ts-jest)
 - **Test single file:** `npx jest __tests__/utils.test.ts`
 - **Lint:** `npm run lint` (Prettier + ESLint)
-- **Node version:** 22 (see `.nvmrc`; action runs on `node22`)
+- **Node version:** 22 for development (see `.nvmrc`); action runtime is `node20` in `action.yml` (GitHub Actions skips node22, upgrade to `node24` when available ~June 2026)
 
 The `lib/` directory contains the compiled/bundled output and is checked into git (required for GitHub Actions). **You must run `npm run build` and commit `lib/` after any source change.** CI verifies `lib/` matches the build output and will fail if it's stale.
 

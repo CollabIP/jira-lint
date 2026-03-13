@@ -50,7 +50,7 @@
     "undici@<=6.23.0": "6.24.0"
   },
   "devDependencies": {
-    "@types/jest": "^30.0.0",
+    "@types/jest": "^29.5.14",
     "@types/string-similarity": "^4.0.2",
     "@vercel/ncc": "^0.38.4",
     "axios": "^1.4.0",

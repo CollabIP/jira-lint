@@ -213,7 +213,7 @@ npm run build     # bundle src/main.ts → lib/index.js via ncc
 
 ### Important: build before you push
 
-GitHub Actions runs the **compiled** `lib/index.js` bundle directly — not the TypeScript source. When a consumer references `uses: CollabIP/jira-lint@v1`, GitHub clones the repo at that ref and runs whatever `action.yml` points to. There is no install or build step on the consumer side, so the compiled output **must** already exist in the repo. This is a platform constraint, not a mistake — do not add `lib/` to `.gitignore`.
+GitHub Actions runs the **compiled** `lib/index.js` bundle directly — not the TypeScript source. When a consumer references `uses: cleartax/jira-lint@v1`, GitHub clones the repo at that ref and runs whatever `action.yml` points to. There is no install or build step on the consumer side, so the compiled output **must** already exist in the repo. This is a platform constraint, not a mistake — do not add `lib/` to `.gitignore`.
 
 After making changes to any file in `src/`, you **must** run:
 
