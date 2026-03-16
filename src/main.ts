@@ -33,6 +33,7 @@ const getInputs = (): JIRALintActionInputs => {
   const BRANCH_IGNORE_PATTERN: string = core.getInput('skip-branches', { required: false }) || '';
   const SKIP_COMMENTS: boolean = core.getInput('skip-comments', { required: false }) === 'true';
   const PR_THRESHOLD = parseInt(core.getInput('pr-threshold', { required: false }), 10);
+  const VALIDATE_PR_TITLE: boolean = core.getInput('validate_pr_title', { required: false }) !== 'false';
   const VALIDATE_ISSUE_STATUS: boolean = core.getInput('validate_issue_status', { required: false }) === 'true';
   const ALLOWED_ISSUE_STATUSES: string = core.getInput('allowed_issue_statuses');
 
@@ -43,6 +44,7 @@ const getInputs = (): JIRALintActionInputs => {
     SKIP_COMMENTS,
     PR_THRESHOLD: isNaN(PR_THRESHOLD) ? DEFAULT_PR_ADDITIONS_THRESHOLD : PR_THRESHOLD,
     JIRA_BASE_URL: JIRA_BASE_URL.endsWith('/') ? JIRA_BASE_URL.replace(/\/$/, '') : JIRA_BASE_URL,
+    VALIDATE_PR_TITLE,
     VALIDATE_ISSUE_STATUS,
     ALLOWED_ISSUE_STATUSES,
   };
@@ -57,6 +59,7 @@ async function run(): Promise<void> {
       BRANCH_IGNORE_PATTERN,
       SKIP_COMMENTS,
       PR_THRESHOLD,
+      VALIDATE_PR_TITLE,
       VALIDATE_ISSUE_STATUS,
       ALLOWED_ISSUE_STATUSES,
     } = getInputs();
@@ -136,7 +139,7 @@ async function run(): Promise<void> {
     console.log(`JIRA key -> ${issueKey}`);
 
     // validate PR title starts with the JIRA issue key
-    if (!isPRTitleValid(title, issueKey)) {
+    if (VALIDATE_PR_TITLE && !isPRTitleValid(title, issueKey)) {
       const comment: RestEndpointMethodTypes['issues']['createComment']['parameters'] = {
         ...commonPayload,
         body: getInvalidPRTitleComment(title, issueKey),
