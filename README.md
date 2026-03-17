@@ -193,7 +193,38 @@ Since GitHub actions take string inputs, `skip-branches` must be a regex which w
 
 ## Contributing
 
-Follow the instructions [here](https://help.github.com/en/articles/creating-a-javascript-action#commit-and-push-your-action-to-github) to know more about GitHub actions.
+### Prerequisites
+
+- Node.js 22 (see `.nvmrc`). Use `nvm use` to switch.
+
+### Setup
+
+```bash
+npm ci
+```
+
+### Development workflow
+
+```bash
+npm run lint      # prettier + eslint
+npm run test      # jest
+npm run build     # bundle src/main.ts → lib/index.js via ncc
+```
+
+### Important: build before you push
+
+GitHub Actions runs the **compiled** `lib/index.js` bundle directly — not the TypeScript source. When a consumer references `uses: cleartax/jira-lint@v1`, GitHub clones the repo at that ref and runs whatever `action.yml` points to. There is no install or build step on the consumer side, so the compiled output **must** already exist in the repo. This is a platform constraint, not a mistake — do not add `lib/` to `.gitignore`.
+
+After making changes to any file in `src/`, you **must** run:
+
+```bash
+npm run build
+git add lib
+```
+
+and commit the updated `lib/` before pushing. CI will fail if the committed `lib/` doesn't match what `npm run build` produces.
+
+> **Note:** If husky hooks are installed, the pre-commit hook runs `npm run build` and stages `lib/` automatically, and the pre-push hook verifies `lib/` is up to date. If hooks aren't active (e.g. fresh clone), you need to do this manually.
 
 ## FAQ
 

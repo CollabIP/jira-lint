@@ -20,6 +20,8 @@ import {
   updatePrDetails,
   isIssueStatusValid,
   getInvalidIssueStatusComment,
+  isPRTitleValid,
+  getInvalidPRTitleComment,
 } from './utils';
 import { PullRequestParams, JIRADetails, JIRALintActionInputs } from './types';
 import { DEFAULT_PR_ADDITIONS_THRESHOLD } from './constants';
@@ -31,6 +33,7 @@ const getInputs = (): JIRALintActionInputs => {
   const BRANCH_IGNORE_PATTERN: string = core.getInput('skip-branches', { required: false }) || '';
   const SKIP_COMMENTS: boolean = core.getInput('skip-comments', { required: false }) === 'true';
   const PR_THRESHOLD = parseInt(core.getInput('pr-threshold', { required: false }), 10);
+  const VALIDATE_PR_TITLE: boolean = core.getInput('validate_pr_title', { required: false }) !== 'false';
   const VALIDATE_ISSUE_STATUS: boolean = core.getInput('validate_issue_status', { required: false }) === 'true';
   const ALLOWED_ISSUE_STATUSES: string = core.getInput('allowed_issue_statuses');
 
@@ -41,6 +44,7 @@ const getInputs = (): JIRALintActionInputs => {
     SKIP_COMMENTS,
     PR_THRESHOLD: isNaN(PR_THRESHOLD) ? DEFAULT_PR_ADDITIONS_THRESHOLD : PR_THRESHOLD,
     JIRA_BASE_URL: JIRA_BASE_URL.endsWith('/') ? JIRA_BASE_URL.replace(/\/$/, '') : JIRA_BASE_URL,
+    VALIDATE_PR_TITLE,
     VALIDATE_ISSUE_STATUS,
     ALLOWED_ISSUE_STATUSES,
   };
@@ -55,6 +59,7 @@ async function run(): Promise<void> {
       BRANCH_IGNORE_PATTERN,
       SKIP_COMMENTS,
       PR_THRESHOLD,
+      VALIDATE_PR_TITLE,
       VALIDATE_ISSUE_STATUS,
       ALLOWED_ISSUE_STATUSES,
     } = getInputs();
@@ -89,15 +94,15 @@ async function run(): Promise<void> {
     const commonPayload = {
       owner,
       repo,
-      // eslint-disable-next-line @typescript-eslint/camelcase
+
       issue_number: prNumber,
     };
 
     // github client with given token
     //const client: github.GitHub = new github.GitHub(GITHUB_TOKEN);
 
-    const client: Octokit = new Octokit({ auth: GITHUB_TOKEN, request: { fetch }});
-    
+    const client: Octokit = new Octokit({ auth: GITHUB_TOKEN, request: { fetch } });
+
     if (!headBranch && !baseBranch) {
       const commentBody = 'jira-lint is unable to determine the head and base branch';
       const comment: RestEndpointMethodTypes['issues']['createComment']['parameters'] = {
@@ -133,6 +138,18 @@ async function run(): Promise<void> {
     const issueKey = issueKeys[issueKeys.length - 1];
     console.log(`JIRA key -> ${issueKey}`);
 
+    // validate PR title starts with the JIRA issue key
+    if (VALIDATE_PR_TITLE && !isPRTitleValid(title, issueKey)) {
+      const comment: RestEndpointMethodTypes['issues']['createComment']['parameters'] = {
+        ...commonPayload,
+        body: getInvalidPRTitleComment(title, issueKey),
+      };
+      await addComment(client, comment);
+
+      core.setFailed(`PR title must start with "${issueKey.toUpperCase()} ". Current title: "${title}"`);
+      process.exit(1);
+    }
+
     const { getTicketDetails } = getJIRAClient(JIRA_BASE_URL, JIRA_TOKEN);
     const details: JIRADetails = await getTicketDetails(issueKey);
     if (details.key) {
@@ -151,7 +168,7 @@ async function run(): Promise<void> {
         const prData: RestEndpointMethodTypes['pulls']['update']['parameters'] = {
           owner,
           repo,
-          // eslint-disable-next-line @typescript-eslint/camelcase
+
           pull_number: prNumber,
           body: getPRDescription(prBody || '', details),
         };
@@ -168,7 +185,7 @@ async function run(): Promise<void> {
 
           // add a comment if the PR is huge
           if (isHumongousPR(additions, prThreshold)) {
-            const hugePrComment: RestEndpointMethodTypes['issues']['createComment']['parameters']  = {
+            const hugePrComment: RestEndpointMethodTypes['issues']['createComment']['parameters'] = {
               ...commonPayload,
               body: getHugePrComment(additions, prThreshold),
             };
@@ -176,12 +193,12 @@ async function run(): Promise<void> {
             addComment(client, hugePrComment);
           }
         }
-      } else{
+      } else {
         console.log('PR description is already updated');
       }
 
       if (!isIssueStatusValid(VALIDATE_ISSUE_STATUS, ALLOWED_ISSUE_STATUSES.split(','), details)) {
-        const invalidIssueStatusComment: RestEndpointMethodTypes['issues']['createComment']['parameters']  = {
+        const invalidIssueStatusComment: RestEndpointMethodTypes['issues']['createComment']['parameters'] = {
           ...commonPayload,
           body: getInvalidIssueStatusComment(details, ALLOWED_ISSUE_STATUSES),
         };
@@ -191,9 +208,8 @@ async function run(): Promise<void> {
         core.setFailed('The found jira issue does is not in acceptable statuses');
         process.exit(1);
       }
-
     } else {
-      const comment: RestEndpointMethodTypes['issues']['createComment']['parameters']  = {
+      const comment: RestEndpointMethodTypes['issues']['createComment']['parameters'] = {
         ...commonPayload,
         body: getNoIdComment(headBranch),
       };

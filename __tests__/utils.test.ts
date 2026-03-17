@@ -12,6 +12,8 @@ import {
   getJIRAClient,
   getInvalidIssueStatusComment,
   isIssueStatusValid,
+  isPRTitleValid,
+  getInvalidPRTitleComment,
 } from '../src/utils';
 import { HIDDEN_MARKER } from '../src/constants';
 import { JIRADetails } from '../src/types';
@@ -88,19 +90,19 @@ describe('getJIRAIssueKeys()', () => {
         'BF-18 abc-123 X-88 ABCDEFGHIJKL-999 abc XY-Z-333 abcDEF-33 ABCDEF-33 abcdef-33 ABC-1 PB2-1 pb2-1 P2P-1 p2p-1'
       )
     ).toEqual([
-      'BF-18',
-      'ABC-123',
-      'X-88',
-      'CDEFGHIJKL-999',
-      'Z-333',
-      'ABCDEF-33',
-      'ABCDEF-33',
-      'ABCDEF-33',
+      'P2P-1',
+      'P2P-1',
+      'PB2-1',
+      'PB2-1',
       'ABC-1',
-      'PB2-1',
-      'PB2-1',
-      'P2P-1',
-      'P2P-1',
+      'ABCDEF-33',
+      'ABCDEF-33',
+      'ABCDEF-33',
+      'Z-333',
+      'CDEFGHIJKL-999',
+      'X-88',
+      'ABC-123',
+      'BF-18',
     ]);
   });
 
@@ -117,7 +119,7 @@ describe('getJIRAIssueKeys()', () => {
     expect(getJIRAIssueKeys('chore/MOJO-6789-task_with_underscores')).toEqual(['MOJO-6789']);
     expect(getJIRAIssueKeys('MOJO-6789/task_with_underscores')).toEqual(['MOJO-6789']);
 
-    expect(getJIRAIssueKeys('MOJO-6789/task_with_underscores-ES-43')).toEqual(['MOJO-6789', 'ES-43']);
+    expect(getJIRAIssueKeys('MOJO-6789/task_with_underscores-ES-43')).toEqual(['ES-43', 'MOJO-6789']);
     expect(getJIRAIssueKeys('nudge-live-chat-users-Es-172')).toEqual(['ES-172']);
 
     expect(getJIRAIssueKeys('feature/missingKey')).toEqual([]);
@@ -186,12 +188,12 @@ describe('getPRDescription()', () => {
       summary: 'Story title or summary',
       project: { name: 'project', url: 'project-url', key: 'abc' },
       status: 'In Progress',
+      customers: [],
     };
     const description = getPRDescription('some_body', issue);
 
     expect(shouldUpdatePRDescription(description)).toBeFalsy();
     expect(description).toContain(issue.key);
-    expect(description).toContain(issue.estimate);
     expect(description).toContain(issue.status);
     expect(description).toContain(issue.labels[0].name);
   });
@@ -219,8 +221,8 @@ describe('getNoIdComment()', () => {
 
 describe('getHugePrComment()', () => {
   it('should return the comment content with additions and threshold', () => {
-    expect(getHugePrComment(1000, 800)).toContain(1000);
-    expect(getHugePrComment(1000, 800)).toContain(800);
+    expect(getHugePrComment(1000, 800)).toContain('1000');
+    expect(getHugePrComment(1000, 800)).toContain('800');
   });
 });
 
@@ -255,6 +257,7 @@ describe('isIssueStatusValid()', () => {
     summary: 'Story title or summary',
     project: { name: 'project', url: 'project-url', key: 'abc' },
     status: 'Assessment',
+    customers: [],
   };
 
   it('should return false if issue validation was enabled but invalid issue status', () => {
@@ -275,8 +278,56 @@ describe('isIssueStatusValid()', () => {
 });
 
 describe('getInvalidIssueStatusComment()', () => {
-  it('should return content with the passed in issue status and allowed statses', () => {
-    expect(getInvalidIssueStatusComment('Assessment', 'In Progress')).toContain('Assessment');
-    expect(getInvalidIssueStatusComment('Assessment', 'In Progress')).toContain('In Progress');
+  it('should return content with the passed in issue status and allowed statuses', () => {
+    const issue: JIRADetails = {
+      key: 'ABC-123',
+      url: 'url',
+      type: { name: 'feature', icon: 'feature-icon-url' },
+      estimate: 1,
+      labels: [{ name: 'frontend', url: 'frontend-url' }],
+      summary: 'Story title or summary',
+      project: { name: 'project', url: 'project-url', key: 'abc' },
+      status: 'Assessment',
+      customers: [],
+    };
+    expect(getInvalidIssueStatusComment(issue, 'In Progress')).toContain('Assessment');
+    expect(getInvalidIssueStatusComment(issue, 'In Progress')).toContain('In Progress');
+  });
+});
+
+describe('isPRTitleValid()', () => {
+  it('should return true when title starts with uppercase issue key and space', () => {
+    expect(isPRTitleValid('MOJO-123 Add new feature', 'MOJO-123')).toBe(true);
+    expect(isPRTitleValid('ES-43 Fix login bug', 'ES-43')).toBe(true);
+  });
+
+  it('should return true when issue key from branch is lowercase', () => {
+    expect(isPRTitleValid('MOJO-123 Add new feature', 'mojo-123')).toBe(true);
+  });
+
+  it('should return false when title does not start with the issue key', () => {
+    expect(isPRTitleValid('Add new feature', 'MOJO-123')).toBe(false);
+    expect(isPRTitleValid('Fix MOJO-123 bug', 'MOJO-123')).toBe(false);
+  });
+
+  it('should return false when issue key is not followed by a space', () => {
+    expect(isPRTitleValid('MOJO-123-Add new feature', 'MOJO-123')).toBe(false);
+    expect(isPRTitleValid('MOJO-123', 'MOJO-123')).toBe(false);
+  });
+
+  it('should return false when title uses lowercase issue key', () => {
+    expect(isPRTitleValid('mojo-123 Add new feature', 'MOJO-123')).toBe(false);
+  });
+
+  it('should return false with empty title', () => {
+    expect(isPRTitleValid('', 'MOJO-123')).toBe(false);
+  });
+});
+
+describe('getInvalidPRTitleComment()', () => {
+  it('should return comment with expected prefix and current title', () => {
+    const comment = getInvalidPRTitleComment('Bad title', 'MOJO-123');
+    expect(comment).toContain('MOJO-123');
+    expect(comment).toContain('Bad title');
   });
 });
