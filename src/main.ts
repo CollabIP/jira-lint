@@ -151,7 +151,27 @@ async function run(): Promise<void> {
     }
 
     const { getTicketDetails } = getJIRAClient(JIRA_BASE_URL, JIRA_TOKEN);
-    const details: JIRADetails = await getTicketDetails(issueKey);
+    let details: JIRADetails;
+    try {
+      details = await getTicketDetails(issueKey);
+    } catch (err: unknown) {
+      const isAxios404 =
+        typeof err === 'object' &&
+        err !== null &&
+        'response' in err &&
+        (err as { response?: { status?: number } }).response?.status === 404;
+      if (isAxios404) {
+        core.warning(
+          `JIRA issue ${issueKey} not found (404). This key was extracted from branch "${headBranch}" and may be a false positive. ` +
+            `If this branch is not associated with a JIRA ticket, add a pattern to 'skip-branches' to ignore it.`
+        );
+        core.setFailed(
+          `JIRA issue ${issueKey} does not exist. Extracted key may be invalid for branch "${headBranch}".`
+        );
+        process.exit(1);
+      }
+      throw err;
+    }
     if (details.key) {
       const podLabel = details?.project?.name || '';
       const hotfixLabel: string = getHotfixLabel(baseBranch);

@@ -31,6 +31,10 @@ describe('shouldSkipBranchLint()', () => {
     expect(shouldSkipBranchLint('all-contributors/add-ghost')).toBe(true);
     expect(shouldSkipBranchLint('chore/add-all-contributors')).toBe(false);
     expect(shouldSkipBranchLint('chore/add-all-contributors-OSS-102')).toBe(false);
+
+    expect(shouldSkipBranchLint('snyk-fix-8d9193e15f933a603c9d4be47c28fad2')).toBe(true);
+    expect(shouldSkipBranchLint('snyk-upgrade-foo-1.2.3')).toBe(true);
+    expect(shouldSkipBranchLint('feature/add-snyk-config')).toBe(false);
   });
 
   it('should handle custom ignore patterns', () => {
