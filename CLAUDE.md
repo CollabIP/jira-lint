@@ -31,3 +31,7 @@ Key design details:
 - **Two HTTP clients:** Octokit for GitHub API, axios for JIRA API. The `node-fetch` package is passed to Octokit's `request.fetch`.
 
 Source files: `src/main.ts` (entry), `src/utils.ts` (all logic), `src/types.ts` (TypeScript types), `src/constants.ts` (regex patterns, defaults).
+
+## Jira
+
+When creating Jira cards for work on this repo, create them in the **CREOTR** project (Conversation Intelligence), not TR.
