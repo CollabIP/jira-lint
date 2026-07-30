@@ -38,8 +38,8 @@
     }
   },
   "dependencies": {
-    "@actions/core": "^1.11.1",
-    "@actions/github": "^6.0.1",
+    "@actions/core": "^2.0.0",
+    "@actions/github": "^8.0.1",
     "@octokit/rest": "^20.1.0",
     "minimist": "^1.2.8",
     "node-fetch": "^3.3.2",
@@ -47,7 +47,7 @@
   },
   "overrides": {
     "minimatch@>=9.0.0 <9.0.7": "9.0.7",
-    "undici@<=6.23.0": "6.24.0"
+    "undici@<6.28.0": "6.28.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",
