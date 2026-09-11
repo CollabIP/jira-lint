@@ -13,7 +13,7 @@ jobs:
     - uses: actions/setup-node@v4
       name: setup node
       with:
-        node-version: '22.x'
+        node-version: '24.x'
 
     - name: "install"
       run: npm ci
